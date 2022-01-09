@@ -3,12 +3,14 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fetchUser = require("../middleware/fetchUser");
+const env = require("dotenv/config");
 const User = require("../models/User");
 
-const JWT_SECRET = "secretkeyforsession$sshh";
+const JWT_SECRET = "secretkeyforsession";
 
 // AUTH ROUTES :
-// signup
+// Route1: signup
 router.post(
   "/signup",
   body("name", "Enter a valid name").isLength({ min: 3 }),
@@ -43,7 +45,7 @@ router.post(
         password: secPass,
       });
       const data = {
-        session: {
+        user: {
           id: user.id,
         },
       };
@@ -58,7 +60,7 @@ router.post(
   }
 );
 
-//login: authenticate
+//Route2: login: authenticate
 router.post(
   "/login",
   body("email", "Enter a valid email").isEmail(),
@@ -77,28 +79,37 @@ router.post(
           .status(400)
           .send("Please try to login with correct credentials");
       }
-      const passwordCompare =await bcrypt.compare(password, user.password);
+      const passwordCompare = await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
         return res
           .status(400)
           .send("Please try to login with correct credentials");
       }
       const data = {
-        session: {
+        user: {
           id: user.id,
         },
       };
-      const authToken =jwt.sign(data, JWT_SECRET);
-      console.log('login success');
+      const authToken = jwt.sign(data, JWT_SECRET);
+      console.log("login success");
       res.json({ authToken });
     } catch (error) {
       console.log(error.message);
-      res
-        .status(500)
-        .send("Oops internal server error occured");
+      res.status(500).send("Oops internal server error occured");
     }
   }
 );
+
+// ROUTE3: Get logged in user details: login required
+router.post("/getUser", fetchUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("password");
+    res.send(user)
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Oops internal server error occured");
+  }
+});
 
 // NOTE ROUTES :
 router.get("/api/notes", (req, res) => {
