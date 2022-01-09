@@ -10,7 +10,7 @@ const JWT_SECRET = "secretkeyforsession$sshh";
 // AUTH ROUTES :
 // signup
 router.post(
-  "/api/auth",
+  "/signup",
   body("name", "Enter a valid name").isLength({ min: 3 }),
   body("email", "Enter a valid email").isEmail(),
   body("password", "Password must be atleast 5 characters").isLength({
@@ -48,7 +48,6 @@ router.post(
         },
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      console.log(data.session);
       res.json({ authToken });
     } catch (error) {
       console.log(error.message);
@@ -59,8 +58,47 @@ router.post(
   }
 );
 
-//login
-
+//login: authenticate
+router.post(
+  "/login",
+  body("email", "Enter a valid email").isEmail(),
+  async (req, res) => {
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { email, password } = req.body;
+    try {
+      //check whteher user with this email exists
+      let user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(400)
+          .send("Please try to login with correct credentials");
+      }
+      const passwordCompare =await bcrypt.compare(password, user.password);
+      if (!passwordCompare) {
+        return res
+          .status(400)
+          .send("Please try to login with correct credentials");
+      }
+      const data = {
+        session: {
+          id: user.id,
+        },
+      };
+      const authToken =jwt.sign(data, JWT_SECRET);
+      console.log('login success');
+      res.json({ authToken });
+    } catch (error) {
+      console.log(error.message);
+      res
+        .status(500)
+        .send("Oops internal server error occured");
+    }
+  }
+);
 
 // NOTE ROUTES :
 router.get("/api/notes", (req, res) => {
