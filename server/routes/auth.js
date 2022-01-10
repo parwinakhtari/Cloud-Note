@@ -45,7 +45,7 @@ router.post(
         password: secPass,
       });
       const data = {
-        user: {
+        session: {
           id: user.id,
         },
       };
@@ -86,7 +86,7 @@ router.post(
           .send("Please try to login with correct credentials");
       }
       const data = {
-        user: {
+        session: {
           id: user.id,
         },
       };
@@ -111,9 +111,5 @@ router.post("/getUser", fetchUser, async (req, res) => {
   }
 });
 
-// NOTE ROUTES :
-router.get("/api/notes", (req, res) => {
-  res.send("notes section");
-});
 
 module.exports = router;
