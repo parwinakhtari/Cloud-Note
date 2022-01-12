@@ -49,10 +49,8 @@ export default function NoteState(props) {
         "auth-token": localStorage.getItem("token"),
       },
     });
-    const json = await response.json();
-    console.log(json);
-    let newNotes = JSON.parse(JSON.stringify(notes));
-    newNotes = notes.filter((note) => {
+    console.log(response);
+   const newNotes = notes.filter((note) => {
       return note._id !== id;
     });
     setnotes(newNotes);

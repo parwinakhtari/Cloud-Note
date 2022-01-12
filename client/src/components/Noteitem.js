@@ -17,12 +17,14 @@ export default function Noteitem(props) {
                 deleteNote(note._id);
                 props.showAlert("Deleted Succesfully", "success");
               }}
+              type="button"
             ></i>
             <i
               className="far fa-edit mx-2"
               onClick={() => {
                 updateNote(note);
               }}
+              type="button"
             ></i>
           </div>
           <p className="card-text">{note.description}</p>
